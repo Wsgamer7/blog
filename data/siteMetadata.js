@@ -1,9 +1,9 @@
 /** @type {import("pliny/config").PlinyConfig } */
 const siteMetadata = {
-  title: 'Wsgamer',
-  author: 'Wsgamer',
-  headerTitle: 'Wsgamer',
-  description: 'A blog of Wsgamer',
+  title: 'ShuoWang | 汪硕',
+  author: 'ShuoWang | 汪硕',
+  headerTitle: 'ShuoWang',
+  description: 'A blog of Shuo Wang| Wang Shuo | 汪硕',
   language: 'zh',
   theme: 'system', // system, dark or light
   siteUrl: 'https://tailwind-nextjs-starter-blog.vercel.app',
