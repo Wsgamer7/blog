@@ -1,0 +1,34 @@
+---
+title: 为什么有这个博客
+date: '2024-7-9'
+tags: ['front end', 'supabase', 'docker']
+draft: false
+summary: 部署supabase和下载docker时遇到的坑，耗时两个半小时
+---
+
+## 坑1.docker
+
+如果是wsl2环境，安装windows docker，在wsl里输入docker按提示来即可；
+如果是linux, 不要用apt install docker-ce,疑似被屏蔽：请使用
+
+```bash
+sudo curl -fsSL https://github.com/tech-shrimp/docker_installer/releases/download/latest/linux.sh| bash -s docker --mirror Aliyun
+```
+
+或者网上搜云服务器商对应的dockers安装方法；举例https://cloud.tencent.com/document/product/213/46000#C_XgAwZpjht292j2EOU2t
+
+docker pull 时不要挂代理，否则失败
+
+## 坑2.supabase配置
+
+如下情景会发生错误：
+
+1. docker compose up -d过之后想改postgresql 密码或者端口，下次docker compose up -d 会卡在supabase-analytics creating, 解决办法:在supabase/docker文件夹运行
+
+```bash
+sudo rm -rf volumes/db/data/
+```
+
+2. ".env"里的任意password设置成纯数字，会导致无法连接到控制台(http://<your-ip>:8000), supabase-kong container 因为识别密码未非字符串而无限重启
+
+tips：进行以上修复后记得docker compose down；docker compose up -d重启supabase
