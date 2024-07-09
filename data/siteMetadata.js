@@ -6,7 +6,7 @@ const siteMetadata = {
   description: 'A blog of Shuo Wang| Wang Shuo | 汪硕',
   language: 'zh',
   theme: 'system', // system, dark or light
-  siteUrl: 'https://tailwind-nextjs-starter-blog.vercel.app',
+  siteUrl: 'https://www.wsgamer.xyz',
   siteRepo: 'https://github.com/Wsgamer7/blog',
   siteLogo: '/static/images/logo.png',
   socialBanner: '/static/images/twitter-card.png',
