@@ -29,6 +29,6 @@ docker pull 时不要挂代理，否则失败
 sudo rm -rf volumes/db/data/
 ```
 
-2. ".env"里的任意password设置成纯数字，会导致无法连接到控制台(http://<your-ip>:8000), supabase-kong container 因为识别密码未非字符串而无限重启
+2. ".env"里的任意password设置成纯数字，会导致无法连接到控制台(http://your-ip:8000), supabase-kong container 因为识别密码未非字符串而无限重启
 
 tips：进行以上修复后记得docker compose down；docker compose up -d重启supabase
