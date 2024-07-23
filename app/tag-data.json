@@ -1,1 +1,9 @@
-{ "front-end": 1, "supabase": 1, "docker": 1, "life-style": 2 }
+{
+  "front-end": 2,
+  "backend": 1,
+  "supabase": 2,
+  "nextjs": 1,
+  "quant": 1,
+  "docker": 1,
+  "life-style": 2
+}

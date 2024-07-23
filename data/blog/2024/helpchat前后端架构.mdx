@@ -1,0 +1,66 @@
+---
+title: helpchat前后端架构
+date: '2024-7-20'
+tags: ['front end', 'backend', 'supabase', 'nextjs']
+draft: false
+summary: 一门艺术而非技术
+---
+
+helpchat 是我对ai商业应用的第一次尝试，用户发聊天图片/记录，ai回答回复方法。
+
+## 1.前端架构
+
+取历史消息用SSR，聊天界面需要滑动用CSR
+![helpchat前端架构](https://zsiyhbzzkskdywvuzasy.supabase.co/storage/v1/object/sign/images/public/helpchatFront.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJpbWFnZXMvcHVibGljL2hlbHBjaGF0RnJvbnQucG5nIiwiaWF0IjoxNzIxNzMyNDk5LCJleHAiOjIwMzcwOTI0OTl9.53zOMXgOhfMrDV1jxH8netKJgOE8TCD5LNH9wbVrInE&t=2024-07-23T11%3A01%3A40.031Z)
+lighthouse评分:
+![lighthouse评分](https://zsiyhbzzkskdywvuzasy.supabase.co/storage/v1/object/sign/images/public/frontScores.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJpbWFnZXMvcHVibGljL2Zyb250U2NvcmVzLnBuZyIsImlhdCI6MTcyMTczMzAyNywiZXhwIjoyMDM3MDkzMDI3fQ.kkSHllL4qjyWcbwFcucGYBcDEEv_Y5RpRACV6zJxleQ&t=2024-07-23T11%3A10%3A28.315Z)
+**首屏加载时间:0.8s **
+
+## 2.后端架构
+
+后端使用supabase作为登录，数据库，图片存储
+
+![表设计](https://zsiyhbzzkskdywvuzasy.supabase.co/storage/v1/object/sign/images/public/helpchatDatabase.drawio.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJpbWFnZXMvcHVibGljL2hlbHBjaGF0RGF0YWJhc2UuZHJhd2lvLnBuZyIsImlhdCI6MTcyMTczNDU4MSwiZXhwIjoyMDM3MDk0NTgxfQ.2wFhjdtyfCXtosnFyAOJB9wgMTxhHJrB9AcKgO1f6wc&t=2024-07-23T11%3A36%3A22.229Z)
+2.1 图片信息和文字信息都用messages表来显示，当**img_path不为空时，认为该消息是图片消息，否则认为是文字消息**
+注意img_path不是完整的url，而是supabase storage中的文件路径，以`$user.id/$img_name.png`形式存在
+
+2.2 首次用github等社交账号登录时，需要将user name和 avatar_url从github的token中取出来，装入profiles表，因为**用不同社交账号登录的同一用户，头像应该相同**，采用
+如下postgresql trigger 函数，每当user表增加一行，就有增加一行profile
+
+```postgresql
+begin
+  insert into public.profiles (id, full_name, avatar_url, email)
+  values (
+    new.id,
+    new.raw_user_meta_data->>'full_name',
+    new.raw_user_meta_data->>'avatar_url',
+    new.raw_user_meta_data->>'email'
+    );
+  return new;
+end;
+```
+
+3.3 唯一的自定义后端api，用来调用ai的api, 在`app/text/route.ts`定义
+
+```typescript
+import { NextResponse } from 'next/server'
+import { getAnswer } from '@/lib/rag'
+export async function POST(req: Request) {
+  try {
+    console.log('Received a HTTP request')
+
+    // 解析请求体
+    const body = await req.json()
+    console.log(body)
+    // 获取答案
+    const answer = await getAnswer(body.text, body.img_url)
+    console.log(answer)
+
+    // 返回答案
+    return NextResponse.json({ text: answer })
+  } catch (error) {
+    console.error('Error processing request:', error)
+    return NextResponse.json({ error: 'Failed to process request' }, { status: 500 })
+  }
+}
+```
